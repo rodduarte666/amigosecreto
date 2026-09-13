@@ -29,22 +29,39 @@ StartSend() {
             return
     }
 
-    urls := []
+    queue := []
     text := FileRead(queuePath, "UTF-8")
     for line in StrSplit(text, "`n", "`r") {
-        line := Trim(line, " `t`r`n" Chr(0xFEFF))
-        if (line != "")
-            urls.Push(line)
+        line := Trim(line, " `r`n" Chr(0xFEFF))
+        if (line = "")
+            continue
+
+        fields := StrSplit(line, "`t")
+        if (fields.Length < 4)
+            continue
+
+        queue.Push({
+            phone: fields[1],
+            giver: fields[2],
+            longLink: fields[3],
+            eventName: fields[4],
+            budget: fields.Length >= 5 ? fields[5] : ""
+        })
     }
 
-    if (urls.Length = 0) {
-        MsgBox("A fila está vazia.", "Amigo Secreto", "Iconx")
+    if (queue.Length = 0) {
+        MsgBox(
+            "A fila está vazia ou foi criada por uma versão antiga do site.`n`nBaixe a fila novamente e tente de novo.",
+            "Amigo Secreto",
+            "Iconx"
+        )
         return
     }
 
     answer := MsgBox(
-        "Encontrei " urls.Length " mensagens na fila.`n`n" .
-        "O script vai abrir cada conversa no WhatsApp Web e pressionar Enter automaticamente.`n`n" .
+        "Encontrei " queue.Length " mensagens na fila.`n`n" .
+        "O script vai encurtar cada link, abrir cada conversa no WhatsApp Web e pressionar Enter automaticamente.`n`n" .
+        "Se o encurtador estiver indisponível, o link privado completo será usado e o envio continuará.`n`n" .
         "F9 cancela a qualquer momento.`n`nContinuar?",
         "Amigo Secreto — envio automático",
         "YesNo Icon!"
@@ -65,11 +82,15 @@ StartSend() {
     sent := 0
 
     try {
-        Loop urls.Length {
+        Loop queue.Length {
             if AbortSend
                 break
 
-            url := urls[A_Index]
+            item := queue[A_Index]
+            ToolTip("Preparando link " A_Index "/" queue.Length "…")
+            link := ShortenUrl(item.longLink)
+            message := BuildMessage(item.giver, item.eventName, item.budget, link)
+            url := "https://web.whatsapp.com/send?phone=" item.phone "&text=" UriEncode(message)
 
             if (A_Index = 1) {
                 Run(url)
@@ -93,7 +114,7 @@ StartSend() {
                 }
             }
 
-            ToolTip("Carregando " A_Index "/" urls.Length "…")
+            ToolTip("Carregando " A_Index "/" queue.Length "…")
             Sleep(PageLoadWait)
 
             if AbortSend
@@ -106,7 +127,7 @@ StartSend() {
 
             Send("{Enter}")
             sent += 1
-            ToolTip("Enviado " sent "/" urls.Length)
+            ToolTip("Enviado " sent "/" queue.Length)
             Sleep(AfterSendWait)
         }
     } finally {
@@ -115,9 +136,64 @@ StartSend() {
     }
 
     if AbortSend
-        MsgBox("Envio cancelado. Foram enviados " sent " de " urls.Length ".", "Amigo Secreto", "Icon!")
+        MsgBox("Envio cancelado. Foram enviados " sent " de " queue.Length ".", "Amigo Secreto", "Icon!")
     else
         MsgBox("Pronto — " sent " mensagens enviadas.", "Amigo Secreto", "Iconi")
+}
+
+BuildMessage(giver, eventName, budget, link) {
+    message := "🎄 *" eventName "* 🎁`n`n"
+        . "Oi, " giver "! Seu sorteio está pronto.`n`n"
+        . "Abra seu link privado para descobrir quem você tirou:`n"
+        . link
+
+    if (budget != "")
+        message .= "`n`n💰 " budget
+
+    message .= "`n`n🤫 Não encaminhe este link — ele é só seu."
+    return message
+}
+
+ShortenUrl(longUrl) {
+    for domain in ["is.gd", "v.gd"] {
+        try {
+            req := ComObject("WinHttp.WinHttpRequest.5.1")
+            req.SetTimeouts(5000, 5000, 5000, 10000)
+            api := "https://" domain "/create.php?format=simple&url=" UriEncode(longUrl)
+            req.Open("GET", api, false)
+            req.SetRequestHeader("User-Agent", "AmigoSecretoFamily/1.0")
+            req.Send()
+
+            if (req.Status = 200) {
+                shortUrl := Trim(req.ResponseText)
+                if RegExMatch(shortUrl, "^https?://")
+                    return shortUrl
+            }
+        }
+        Sleep(400)
+    }
+
+    return longUrl
+}
+
+UriEncode(str) {
+    size := StrPut(str, "UTF-8")
+    buf := Buffer(size)
+    StrPut(str, buf, , "UTF-8")
+    out := ""
+
+    Loop size - 1 {
+        b := NumGet(buf, A_Index - 1, "UChar")
+        if ((b >= 0x30 && b <= 0x39)
+            || (b >= 0x41 && b <= 0x5A)
+            || (b >= 0x61 && b <= 0x7A)
+            || b = 0x2D || b = 0x2E || b = 0x5F || b = 0x7E) {
+            out .= Chr(b)
+        } else {
+            out .= "%" Format("{:02X}", b)
+        }
+    }
+    return out
 }
 
 GetDownloadsFolder() {
@@ -130,5 +206,5 @@ GetDownloadsFolder() {
     return A_UserProfile "\Downloads"
 }
 
-; Também pode pressionar F8 para repetir a fila sem fechar o script.
+; F8 repete a fila; F9 cancela imediatamente.
 StartSend()
