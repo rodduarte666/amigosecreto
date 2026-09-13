@@ -197,14 +197,14 @@ UriEncode(str) {
 }
 
 GetDownloadsFolder() {
+    userProfile := EnvGet("USERPROFILE")
     try {
         path := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders", "{374DE290-123F-4565-9164-39C4925E467B}")
-        path := StrReplace(path, "%USERPROFILE%", A_UserProfile)
+        path := StrReplace(path, "%USERPROFILE%", userProfile)
         if DirExist(path)
             return path
     }
-    return A_UserProfile "\Downloads"
+    return userProfile "\Downloads"
 }
 
-; Ctrl+Shift+Alt+Win+A repete a fila; F9 cancela imediatamente.
-StartSend()
+; Ctrl+Shift+Alt+Win+A inicia a fila; F9 cancela imediatamente.
