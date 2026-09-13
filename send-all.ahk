@@ -6,7 +6,7 @@ global AbortSend := false
 global PageLoadWait := 7500
 global AfterSendWait := 1600
 
-F8::StartSend()
+^+!#a::StartSend()
 F9::CancelSend()
 
 CancelSend() {
@@ -206,5 +206,5 @@ GetDownloadsFolder() {
     return A_UserProfile "\Downloads"
 }
 
-; F8 repete a fila; F9 cancela imediatamente.
+; Ctrl+Shift+Alt+Win+A repete a fila; F9 cancela imediatamente.
 StartSend()
