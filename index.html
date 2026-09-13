@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Amigo Secreto</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121a2c; --panel2:#182237; --text:#f8fafc;
+      --muted:#aab4c5; --line:#2a3854; --accent:#34d399; --accent2:#10b981;
+      --danger:#fb7185; --warn:#fbbf24; --shadow:0 18px 55px rgba(0,0,0,.28);
+      color-scheme:dark;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
+      "Segoe UI",sans-serif; background:
+      radial-gradient(circle at 0 0,rgba(16,185,129,.16),transparent 34rem),
+      radial-gradient(circle at 100% 0,rgba(59,130,246,.12),transparent 28rem),
+      var(--bg); color:var(--text); min-height:100vh;
+    }
+    button,input,select{font:inherit}
+    a{color:inherit}
+    .wrap{max-width:960px;margin:0 auto;padding:24px 16px 72px}
+    .hero{padding:28px 4px 18px}
+    .eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:800}
+    h1{font-size:clamp(2.1rem,7vw,4rem);line-height:.95;margin:.35rem 0 1rem;letter-spacing:-.05em}
+    h2{margin:0 0 8px;font-size:1.15rem}
+    p{color:var(--muted);line-height:1.55}
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.018));
+      border:1px solid var(--line); border-radius:20px; padding:18px; margin:14px 0; box-shadow:var(--shadow);
+      backdrop-filter:blur(8px);
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:680px){.grid,.grid3{grid-template-columns:1fr}}
+    label{display:block;color:#dbe5f5;font-size:.84rem;font-weight:700;margin:0 0 7px}
+    input,select{
+      width:100%;background:#0f1728;color:var(--text);border:1px solid var(--line);
+      border-radius:12px;padding:12px 13px;outline:none
+    }
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(52,211,153,.11)}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .between{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .btn{
+      border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;
+      background:var(--accent);color:#06261d;transition:.15s transform,.15s opacity;
+      text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .btn.secondary{background:#24324d;color:#e8eef8;border:1px solid #354666}
+    .btn.danger{background:#3a1a25;color:#fecdd3;border:1px solid #633044}
+    .btn.whatsapp{background:#25D366;color:#052b15}
+    .mini{font-size:.8rem;padding:8px 10px;border-radius:10px}
+    .participant,.rule,.sendrow{
+      display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:center;
+      background:#0e1627;border:1px solid #22314b;border-radius:14px;padding:10px;margin:9px 0
+    }
+    .rule{grid-template-columns:1fr auto}
+    .sendrow{grid-template-columns:1fr auto auto}
+    @media(max-width:620px){.participant,.sendrow{grid-template-columns:1fr}.participant .btn,.sendrow .btn{width:100%}}
+    .name{font-weight:850}
+    .sub{font-size:.82rem;color:var(--muted);margin-top:3px}
+    .pill{font-size:.75rem;padding:4px 8px;border-radius:999px;background:#20304c;color:#cbd5e1}
+    .notice{border-radius:14px;padding:12px 13px;margin:12px 0;border:1px solid}
+    .notice.ok{background:#0d2d25;border-color:#1d5b4a;color:#b7f7db}
+    .notice.warn{background:#33280d;border-color:#73581a;color:#fde68a}
+    .notice.err{background:#35141d;border-color:#733044;color:#fecdd3}
+    .muted{color:var(--muted)}
+    .hidden{display:none!important}
+    .divider{height:1px;background:var(--line);margin:18px 0}
+    .check{display:flex;gap:9px;align-items:center;color:#dce6f5;font-size:.9rem}
+    .check input{width:auto}
+    .bigResult{
+      text-align:center;padding:24px 16px;border:1px solid #2d4b46;border-radius:18px;
+      background:linear-gradient(180deg,#112820,#0d1d1a)
+    }
+    .bigResult .to{font-size:clamp(2rem,9vw,4.4rem);font-weight:950;letter-spacing:-.05em;margin:8px 0}
+    .footer{font-size:.78rem;color:#7f8ba0;text-align:center;margin-top:28px}
+    code{background:#0b1220;border:1px solid #22314b;padding:.12rem .35rem;border-radius:6px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">🎄 Família • 2026</div>
+    <h1>Amigo Secreto</h1>
+    <p id="heroText">Monte o sorteio, aplique restrições e envie cada resultado pelo WhatsApp sem mostrar os pares na tela.</p>
+  </section>
+
+  <main id="organizerView">
+    <section class="card">
+      <h2>1. Detalhes</h2>
+      <div class="grid">
+        <div>
+          <label for="eventName">Nome do sorteio</label>
+          <input id="eventName" value="Amigo Secreto 2026" />
+        </div>
+        <div>
+          <label for="budget">Valor do presente (opcional)</label>
+          <input id="budget" placeholder="Ex.: até R$ 100" />
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label for="publicUrl">Endereço público deste site</label>
+        <input id="publicUrl" placeholder="Ex.: https://seuusuario.github.io/amigo-secreto/" />
+        <div class="sub">Quando estiver publicado, cole aqui o endereço. Os links privados serão criados a partir dele.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="between">
+        <div>
+          <h2>2. Participantes</h2>
+          <div class="sub">Número com DDD. Se for brasileiro, pode deixar sem +55.</div>
+        </div>
+        <button class="btn secondary mini" id="addParticipant">+ Adicionar</button>
+      </div>
+      <div id="participants"></div>
+      <div id="participantError"></div>
+    </section>
+
+    <section class="card">
+      <h2>3. Restrições</h2>
+      <p style="margin-top:4px">Todo mundo já está impedido de tirar a si próprio. Adicione aqui casais ou qualquer outra combinação proibida.</p>
+      <div class="grid3">
+        <div>
+          <label for="fromPerson">Quem não pode tirar</label>
+          <select id="fromPerson"></select>
+        </div>
+        <div>
+          <label for="toPerson">Esta pessoa</label>
+          <select id="toPerson"></select>
+        </div>
+        <div style="display:flex;align-items:end">
+          <button class="btn secondary" style="width:100%" id="addRule">Adicionar restrição</button>
+        </div>
+      </div>
+      <label class="check" style="margin-top:12px">
+        <input type="checkbox" id="bothWays" checked />
+        Aplicar nos dois sentidos
+      </label>
+      <div id="rules"></div>
+    </section>
+
+    <section class="card">
+      <h2>4. Sortear</h2>
+      <p>O sistema procura uma combinação válida aleatoriamente. Os nomes sorteados não aparecem na tela do organizador.</p>
+      <div id="securityWarning"></div>
+      <div class="row">
+        <button class="btn" id="drawBtn">🎁 Fazer o sorteio</button>
+        <button class="btn danger hidden" id="resetDrawBtn">Apagar sorteio e começar de novo</button>
+      </div>
+      <div id="drawError"></div>
+    </section>
+
+    <section class="card hidden" id="sendCard">
+      <h2>5. Enviar pelo WhatsApp</h2>
+      <p>Cada botão abre o WhatsApp com uma mensagem individual e um link privado. A tela abaixo não mostra quem cada pessoa tirou.</p>
+      <div id="sendList"></div>
+      <div class="notice ok">
+        ✅ Pronto. Depois de enviar todos os links, você pode fechar esta página. Cada participante verá somente o próprio resultado.
+      </div>
+    </section>
+  </main>
+
+  <main id="revealView" class="hidden">
+    <section class="card">
+      <div id="revealStatus">
+        <h2>Abrindo seu sorteio…</h2>
+        <p>Um instante.</p>
+      </div>
+      <div id="revealResult" class="hidden">
+        <div class="bigResult">
+          <div class="muted" id="hello"></div>
+          <div style="margin-top:14px">🎁 Você tirou:</div>
+          <div class="to" id="receiverName"></div>
+          <div class="muted" id="eventLabel"></div>
+          <div class="muted" id="budgetLabel" style="margin-top:5px"></div>
+        </div>
+        <div class="notice ok" style="margin-top:14px">
+          🤫 Guarde segredo. Este link é individual — não encaminhe para outra pessoa.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">Feito para um sorteio privado em família. Nenhum nome ou resultado é enviado para um servidor por este app.</div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    people: [],
+    rules: [],
+    draw: null
+  };
+
+  function id() {
+    return (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now());
+  }
+
+  function escapeHtml(s='') {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  function saveSetup() {
+    localStorage.setItem('secretSantaSetup', JSON.stringify({
+      people: state.people,
+      rules: state.rules,
+      eventName: $('eventName').value,
+      budget: $('budget').value,
+      publicUrl: $('publicUrl').value
+    }));
+  }
+
+  function loadSetup() {
+    try {
+      const s = JSON.parse(localStorage.getItem('secretSantaSetup') || 'null');
+      if (!s) return;
+      state.people = Array.isArray(s.people) ? s.people : [];
+      state.rules = Array.isArray(s.rules) ? s.rules : [];
+      $('eventName').value = s.eventName || 'Amigo Secreto 2026';
+      $('budget').value = s.budget || '';
+      $('publicUrl').value = s.publicUrl || '';
+    } catch {}
+  }
+
+  function addPerson(name='', phone='') {
+    state.people.push({id:id(), name, phone});
+    renderPeople();
+    saveSetup();
+  }
+
+  function renderPeople() {
+    const host = $('participants');
+    host.innerHTML = '';
+    state.people.forEach((p, index) => {
+      const row = document.createElement('div');
+      row.className = 'participant';
+      row.innerHTML = `
+        <input aria-label="Nome" placeholder="Nome" value="${escapeHtml(p.name)}" data-name="${p.id}">
+        <input aria-label="WhatsApp" inputmode="tel" placeholder="WhatsApp" value="${escapeHtml(p.phone)}" data-phone="${p.id}">
+        <button class="btn danger mini" data-remove="${p.id}">Remover</button>
+      `;
+      host.appendChild(row);
+    });
+
+    host.querySelectorAll('[data-name]').forEach(el => el.addEventListener('input', e => {
+      const p = state.people.find(x => x.id === e.target.dataset.name);
+      if (p) p.name = e.target.value;
+      renderRuleSelectors(false);
+      saveSetup();
+    }));
+    host.querySelectorAll('[data-phone]').forEach(el => el.addEventListener('input', e => {
+      const p = state.people.find(x => x.id === e.target.dataset.phone);
+      if (p) p.phone = e.target.value;
+      saveSetup();
+    }));
+    host.querySelectorAll('[data-remove]').forEach(el => el.addEventListener('click', e => {
+      const pid = e.target.dataset.remove;
+      state.people = state.people.filter(x => x.id !== pid);
+      state.rules = state.rules.filter(r => r.from !== pid && r.to !== pid);
+      renderPeople();
+      renderRules();
+      saveSetup();
+    }));
+    renderRuleSelectors(false);
+  }
+
+  function renderRuleSelectors(preserve=true) {
+    const prevA = preserve ? $('fromPerson').value : '';
+    const prevB = preserve ? $('toPerson').value : '';
+    const opts = state.people.map(p => `<option value="${p.id}">${escapeHtml(p.name || 'Sem nome')}</option>`).join('');
+    $('fromPerson').innerHTML = `<option value="">Selecione…</option>${opts}`;
+    $('toPerson').innerHTML = `<option value="">Selecione…</option>${opts}`;
+    if (state.people.some(p => p.id === prevA)) $('fromPerson').value = prevA;
+    if (state.people.some(p => p.id === prevB)) $('toPerson').value = prevB;
+  }
+
+  function personName(pid) {
+    return state.people.find(p => p.id === pid)?.name || 'Pessoa';
+  }
+
+  function renderRules() {
+    $('rules').innerHTML = state.rules.map((r, i) => `
+      <div class="rule">
+        <div><strong>${escapeHtml(personName(r.from))}</strong> não pode tirar <strong>${escapeHtml(personName(r.to))}</strong></div>
+        <button class="btn danger mini" data-rule="${i}">Remover</button>
+      </div>
+    `).join('');
+    $('rules').querySelectorAll('[data-rule]').forEach(b => b.addEventListener('click', e => {
+      state.rules.splice(Number(e.target.dataset.rule), 1);
+      renderRules(); saveSetup();
+    }));
+  }
+
+  function addRule(from,to) {
+    if (!from || !to || from === to) return;
+    if (!state.rules.some(r => r.from === from && r.to === to)) state.rules.push({from,to});
+  }
+
+  function normalizePhone(phone) {
+    let d = (phone || '').replace(/\D/g,'');
+    if (!d) return '';
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.startsWith('0') && d.length > 10) d = d.slice(1);
+    if ((d.length === 10 || d.length === 11) && !d.startsWith('55')) d = '55' + d;
+    return d;
+  }
+
+  function validatePeople() {
+    const names = state.people.map(p => p.name.trim()).filter(Boolean);
+    if (state.people.length < 3) return 'Adicione pelo menos 3 participantes.';
+    if (names.length !== state.people.length) return 'Preencha o nome de todos os participantes.';
+    const lower = names.map(n => n.toLocaleLowerCase('pt-BR'));
+    if (new Set(lower).size !== lower.length) return 'Há nomes repetidos. Use nomes diferentes para evitar confusão.';
+    for (const p of state.people) {
+      if (!normalizePhone(p.phone)) return `Preencha o WhatsApp de ${p.name}.`;
+    }
+    return '';
+  }
+
+  function allowed(giver, receiver) {
+    if (giver.id === receiver.id) return false;
+    if (state.rules.some(r => r.from === giver.id && r.to === receiver.id)) return false;
+    return true;
+  }
+
+  function shuffle(a) {
+    a = [...a];
+    for (let i=a.length-1;i>0;i--) {
+      const r = new Uint32Array(1);
+      crypto.getRandomValues(r);
+      const j = r[0] % (i+1);
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  // Randomized bipartite matching via backtracking.
+  function makeDraw() {
+    const givers = [...state.people]
+      .map(g => ({g, options: state.people.filter(r => allowed(g,r)).length}))
+      .sort((a,b) => a.options-b.options)
+      .map(x => x.g);
+
+    const used = new Set();
+    const result = new Map();
+
+    function solve(i) {
+      if (i === givers.length) return true;
+      const g = givers[i];
+      const candidates = shuffle(state.people.filter(r => !used.has(r.id) && allowed(g,r)));
+      for (const r of candidates) {
+        used.add(r.id); result.set(g.id,r.id);
+        if (solve(i+1)) return true;
+        used.delete(r.id); result.delete(g.id);
+      }
+      return false;
+    }
+
+    return solve(0) ? result : null;
+  }
+
+  function bytesToB64url(bytes) {
+    let bin = '';
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+
+  function b64urlToBytes(s) {
+    s = s.replace(/-/g,'+').replace(/_/g,'/');
+    while (s.length % 4) s += '=';
+    const bin = atob(s);
+    return Uint8Array.from(bin, c => c.charCodeAt(0));
+  }
+
+  async function encryptPayload(payload) {
+    if (!crypto.subtle) throw new Error('Web Crypto indisponível');
+    const keyBytes = crypto.getRandomValues(new Uint8Array(32));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['encrypt']);
+    const data = new TextEncoder().encode(JSON.stringify(payload));
+    const encrypted = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data));
+    return `${bytesToB64url(iv)}.${bytesToB64url(encrypted)}.${bytesToB64url(keyBytes)}`;
+  }
+
+  async function decryptPayload(token) {
+    const [ivS, dataS, keyS] = token.split('.');
+    if (!ivS || !dataS || !keyS) throw new Error('Link inválido');
+    const iv = b64urlToBytes(ivS);
+    const data = b64urlToBytes(dataS);
+    const keyBytes = b64urlToBytes(keyS);
+    const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function baseUrl() {
+    let u = $('publicUrl').value.trim();
+    if (!u && location.protocol.startsWith('http')) u = location.href.split('#')[0].split('?')[0];
+    return u.replace(/#.*$/,'');
+  }
+
+  function buildMessage(p, link) {
+    const eventName = $('eventName').value.trim() || 'Amigo Secreto';
+    const budget = $('budget').value.trim();
+    return `🎄 *${eventName}* 🎁\n\nOi, ${p.name}! Seu sorteio está pronto.\n\nAbra seu link privado para descobrir quem você tirou:\n${link}` +
+      (budget ? `\n\n💰 ${budget}` : '') +
+      `\n\n🤫 Não encaminhe este link — ele é só seu.`;
+  }
+
+  async function buildSendList(draw) {
+    const url = baseUrl();
+    if (!url || !/^https?:\/\//i.test(url)) {
+      throw new Error('Publique o site e informe o endereço público (https://...) antes de gerar os links.');
+    }
+    const eventName = $('eventName').value.trim() || 'Amigo Secreto';
+    const budget = $('budget').value.trim();
+    const rows = [];
+
+    for (const giver of state.people) {
+      const receiver = state.people.find(p => p.id === draw.get(giver.id));
+      const token = await encryptPayload({
+        v:1,
+        giver:giver.name,
+        receiver:receiver.name,
+        event:eventName,
+        budget
+      });
+      const link = `${url}#reveal=${token}`;
+      const text = buildMessage(giver, link);
+      const phone = normalizePhone(giver.phone);
+      rows.push({giver, link, wa:`https://wa.me/${phone}?text=${encodeURIComponent(text)}`});
+    }
+    return rows;
+  }
+
+  function updateSecurityWarning() {
+    const secure = !!crypto.subtle && (window.isSecureContext || location.hostname === 'localhost');
+    $('securityWarning').innerHTML = secure
+      ? `<div class="notice ok">🔒 Os resultados são criptografados no navegador. O fragmento privado do link não é enviado ao servidor do site.</div>`
+      : `<div class="notice warn">⚠️ Abra este app por HTTPS (por exemplo, GitHub Pages) para ativar a criptografia e gerar os links finais.</div>`;
+  }
+
+  $('addParticipant').addEventListener('click', () => addPerson());
+  $('addRule').addEventListener('click', () => {
+    const a = $('fromPerson').value, b = $('toPerson').value;
+    if (!a || !b || a===b) return;
+    addRule(a,b);
+    if ($('bothWays').checked) addRule(b,a);
+    renderRules(); saveSetup();
+  });
+
+  ['eventName','budget','publicUrl'].forEach(x => $(x).addEventListener('input',saveSetup));
+
+  $('drawBtn').addEventListener('click', async () => {
+    $('drawError').innerHTML = '';
+    const err = validatePeople();
+    if (err) {
+      $('drawError').innerHTML = `<div class="notice err">${escapeHtml(err)}</div>`;
+      return;
+    }
+    if (!crypto.subtle) {
+      $('drawError').innerHTML = `<div class="notice err">Este navegador/contexto não oferece a criptografia necessária. Publique e abra o site por HTTPS.</div>`;
+      return;
+    }
+
+    const draw = makeDraw();
+    if (!draw) {
+      $('drawError').innerHTML = `<div class="notice err">Não existe uma combinação possível com essas restrições. Remova alguma restrição e tente novamente.</div>`;
+      return;
+    }
+
+    try {
+      const rows = await buildSendList(draw);
+      state.draw = draw;
+      $('sendList').innerHTML = rows.map((x,i) => `
+        <div class="sendrow">
+          <div>
+            <div class="name">${escapeHtml(x.giver.name)}</div>
+            <div class="sub">${escapeHtml(x.giver.phone)}</div>
+          </div>
+          <button class="btn secondary mini" data-copy="${i}">Copiar link</button>
+          <a class="btn whatsapp mini" href="${x.wa}" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      `).join('');
+
+      $('sendList').querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', async e => {
+        const item = rows[Number(e.target.dataset.copy)];
+        await navigator.clipboard.writeText(item.link);
+        const old = e.target.textContent; e.target.textContent = 'Copiado ✓';
+        setTimeout(() => e.target.textContent = old, 1200);
+      }));
+
+      $('sendCard').classList.remove('hidden');
+      $('resetDrawBtn').classList.remove('hidden');
+      $('drawBtn').disabled = true;
+      document.querySelectorAll('#participants input,#participants button,#addParticipant,#addRule,#fromPerson,#toPerson,#bothWays,#eventName,#budget,#publicUrl')
+        .forEach(el => el.disabled = true);
+      $('sendCard').scrollIntoView({behavior:'smooth',block:'start'});
+    } catch(e) {
+      $('drawError').innerHTML = `<div class="notice err">${escapeHtml(e.message || String(e))}</div>`;
+    }
+  });
+
+  $('resetDrawBtn').addEventListener('click', () => {
+    if (!confirm('Apagar este sorteio? Os links já enviados deixarão de ser confiáveis se você fizer outro sorteio.')) return;
+    state.draw = null;
+    $('sendCard').classList.add('hidden');
+    $('sendList').innerHTML = '';
+    $('resetDrawBtn').classList.add('hidden');
+    $('drawBtn').disabled = false;
+    document.querySelectorAll('#participants input,#participants button,#addParticipant,#addRule,#fromPerson,#toPerson,#bothWays,#eventName,#budget,#publicUrl')
+      .forEach(el => el.disabled = false);
+  });
+
+  async function revealFromHash() {
+    const m = location.hash.match(/^#reveal=(.+)$/);
+    if (!m) return false;
+    $('organizerView').classList.add('hidden');
+    $('revealView').classList.remove('hidden');
+    $('heroText').textContent = 'Seu resultado privado do Amigo Secreto.';
+    try {
+      if (!crypto.subtle) throw new Error('Criptografia indisponível neste navegador.');
+      const p = await decryptPayload(m[1]);
+      $('hello').textContent = `Oi, ${p.giver}!`;
+      $('receiverName').textContent = p.receiver;
+      $('eventLabel').textContent = p.event || 'Amigo Secreto';
+      $('budgetLabel').textContent = p.budget ? `💰 ${p.budget}` : '';
+      $('revealStatus').classList.add('hidden');
+      $('revealResult').classList.remove('hidden');
+      document.title = 'Seu Amigo Secreto 🎁';
+    } catch(e) {
+      $('revealStatus').innerHTML = `<div class="notice err">Não foi possível abrir este resultado. O link pode estar incompleto ou alterado.</div>`;
+    }
+    return true;
+  }
+
+  async function init() {
+    if (await revealFromHash()) return;
+    loadSetup();
+    if (!state.people.length) {
+      addPerson('Rodrigo','');
+      addPerson('','');
+      addPerson('','');
+    } else {
+      renderPeople();
+      renderRules();
+    }
+    updateSecurityWarning();
+    if (!$('publicUrl').value && location.protocol.startsWith('http')) {
+      $('publicUrl').value = location.href.split('#')[0].split('?')[0];
+      saveSetup();
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
